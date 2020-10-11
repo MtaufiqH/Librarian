@@ -1,10 +1,8 @@
 package com.raywenderlich.android.librarian.database.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.raywenderlich.android.librarian.model.Genre
+import com.raywenderlich.android.librarian.model.relations.BooksByGenre
 
 /**
  * Created By Taufiq on 10/8/2020.
@@ -21,4 +19,12 @@ interface GenreDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addGenres(genres: List<Genre>)
+
+    @Transaction
+    @Query("SELECT * FROM genres WHERE id= :genreId")
+    fun getBooksByGenre(genreId: String): BooksByGenre
+
+    @Transaction
+    @Query("SELECT * FROM genres")
+    fun getBooksByGenre(): List<BooksByGenre>
 }

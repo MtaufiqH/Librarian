@@ -76,12 +76,20 @@ class LibrarianRepositoryImpl(
     override fun addReadingList(readingList: ReadingList) = readingListDao.addReadingList(readingList)
 
     override fun getReadingList(): List<ReadingListsWithBooks> =
-        readingListDao.getReadingList().map {
-            ReadingListsWithBooks(it.id, it.name, emptyList())
-    }
+            readingListDao.getReadingList().map {
+                ReadingListsWithBooks(it.id, it.name, emptyList())
+            }
 
     override fun removeReadingList(readingList: ReadingList) {
         readingListDao.deleteReadingList(readingList)
     }
+
+
+    override fun getBooksByGenre(genreId: String): List<BookAndGenre> =
+            genreDao.getBooksByGenre(genreId).let { booksByGenre ->
+                val books = booksByGenre.books ?: return emptyList()
+                return books.map { BookAndGenre(it, booksByGenre.genre) }
+
+            }
 
 }

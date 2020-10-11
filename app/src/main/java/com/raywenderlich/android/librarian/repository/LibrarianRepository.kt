@@ -6,6 +6,7 @@ import com.raywenderlich.android.librarian.model.ReadingList
 import com.raywenderlich.android.librarian.model.Review
 import com.raywenderlich.android.librarian.model.relations.BookAndGenre
 import com.raywenderlich.android.librarian.model.relations.BookReview
+import com.raywenderlich.android.librarian.model.relations.BooksByGenre
 import com.raywenderlich.android.librarian.model.relations.ReadingListsWithBooks
 
 /**
@@ -44,4 +45,6 @@ interface LibrarianRepository {
     fun getReadingList(): List<ReadingListsWithBooks>
 
     fun removeReadingList(readingList: ReadingList)
+
+    fun getBooksByGenre(genreId: String): List<BookAndGenre>
 }
