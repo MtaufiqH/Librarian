@@ -28,9 +28,7 @@ class LibrarianRepositoryImpl(
     }
 
     override fun getBooks(): List<BookAndGenre> {
-        return bookDao.getBooks().map { books ->
-            BookAndGenre(books, genreDao.getGenreById(books.genreId))
-        }
+        return bookDao.getBooks()
     }
 
     override fun getBookById(bookId: String): Book {
@@ -61,15 +59,19 @@ class LibrarianRepositoryImpl(
 
     }
 
+    override fun deleteReview(review: Review) {
+        TODO("Not yet implemented")
+    }
+
     override fun getReviews(): List<BookReview> {
         return reviewDao.getReview().map {
             BookReview(it, bookDao.getBookById(it.bookId))
         }
     }
 
-    override fun deleteReview(review: BookReview) {
-
-    }
+//    override fun deleteReview(review: BookReview) {
+//
+//    }
 
     override fun addReadingList(readingList: ReadingList) = readingListDao.addReadingList(readingList)
 
