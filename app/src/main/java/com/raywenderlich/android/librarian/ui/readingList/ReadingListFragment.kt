@@ -39,6 +39,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.raywenderlich.android.librarian.App
 import com.raywenderlich.android.librarian.R
@@ -49,6 +50,7 @@ import com.raywenderlich.android.librarian.ui.readingListDetails.ReadingListDeta
 import com.raywenderlich.android.librarian.utils.createAndShowDialog
 import com.raywenderlich.android.librarian.utils.toast
 import kotlinx.android.synthetic.main.fragment_reading_list.*
+import kotlinx.coroutines.launch
 
 class ReadingListFragment : Fragment() {
 
@@ -76,8 +78,10 @@ class ReadingListFragment : Fragment() {
 
 
     private fun loadReadingLists() {
-        adapter.setData(repository.getReadingList())
-        pullToRefresh.isRefreshing = false
+        lifecycleScope.launch {
+            adapter.setData(repository.getReadingList())
+            pullToRefresh.isRefreshing = false
+        }
     }
 
     private fun initListeners() {
@@ -111,8 +115,12 @@ class ReadingListFragment : Fragment() {
     }
 
     private fun removeReadingList(readingList: ReadingListsWithBooks) {
-        repository.removeReadingList(ReadingList(readingList.id, readingList.name))
+        lifecycleScope.launch {
+            repository.removeReadingList(ReadingList(readingList.id, readingList.name))
+            loadReadingLists()
+        }
     }
+
 
     private fun onItemSelected(readingList: ReadingListsWithBooks) {
         startActivity(ReadingListDetailsActivity.getIntent(requireContext(), readingList))

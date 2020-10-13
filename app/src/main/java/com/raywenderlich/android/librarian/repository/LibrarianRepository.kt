@@ -16,13 +16,13 @@ import com.raywenderlich.android.librarian.model.relations.ReadingListsWithBooks
 
 interface LibrarianRepository {
 
-    fun addBook(book: Book)
+    suspend fun addBook(book: Book)
 
-    fun getBooks(): List<BookAndGenre>
+    suspend fun getBooks(): List<BookAndGenre>
 
     fun getBookById(bookId: String): Book
 
-    fun deleteBooks(book: Book)
+    suspend fun deleteBooks(book: Book)
 
     fun getGenres(): List<Genre>
 
@@ -40,11 +40,11 @@ interface LibrarianRepository {
 
     fun updateReview(review: Review)
 
-    fun addReadingList(readingList: ReadingList)
+    suspend fun addReadingList(readingList: ReadingList)
 
-    fun getReadingList(): List<ReadingListsWithBooks>
+    suspend fun getReadingList(): List<ReadingListsWithBooks>
 
-    fun removeReadingList(readingList: ReadingList)
+    suspend fun removeReadingList(readingList: ReadingList)
 
     fun getBooksByGenre(genreId: String): List<BookAndGenre>
 

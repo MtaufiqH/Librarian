@@ -39,6 +39,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.raywenderlich.android.librarian.App
 import com.raywenderlich.android.librarian.R
@@ -51,13 +52,14 @@ import com.raywenderlich.android.librarian.ui.filter.FilterPickerDialogFragment
 import com.raywenderlich.android.librarian.utils.createAndShowDialog
 import kotlinx.android.synthetic.main.fragment_books.*
 import kotlinx.android.synthetic.main.fragment_reviews.pullToRefresh
+import kotlinx.coroutines.launch
 
 private const val REQUEST_CODE_ADD_BOOK = 101
 
 class BooksFragment : Fragment() {
 
     private val repository by lazy {
-      App.repository
+        App.repository
     }
 
     private val adapter by lazy { BookAdapter(::onItemLongTapped) }
@@ -100,16 +102,16 @@ class BooksFragment : Fragment() {
         }
     }
 
-    private fun loadBooks() {
+    private fun loadBooks() = lifecycleScope.launch {
         pullToRefresh.isRefreshing = true
 
-        val books = when(val currentFilter = filter){
+        val books = when (val currentFilter = filter) {
             is ByGenre -> repository.getBooksByGenre(currentFilter.genreId)
             is ByRating -> repository.getBooksByRating(currentFilter.rating)
             else -> repository.getBooks()
         }
 
-                adapter.setData(books)
+        adapter.setData(books)
         pullToRefresh.isRefreshing = false
     }
 
@@ -122,7 +124,9 @@ class BooksFragment : Fragment() {
     }
 
     private fun removeBook(book: Book) {
-        repository.deleteBooks(book)
-        loadBooks()
+        lifecycleScope.launch {
+            repository.deleteBooks(book)
+            loadBooks()
+        }
     }
 }
