@@ -39,6 +39,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.raywenderlich.android.librarian.App
 import com.raywenderlich.android.librarian.R
@@ -47,6 +48,9 @@ import com.raywenderlich.android.librarian.ui.addReview.AddBookReviewActivity
 import com.raywenderlich.android.librarian.ui.bookReviewDetails.BookReviewDetailsActivity
 import com.raywenderlich.android.librarian.utils.createAndShowDialog
 import kotlinx.android.synthetic.main.fragment_reviews.*
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 /**
  * Fetches and displays notes from the API.
@@ -55,58 +59,58 @@ private const val REQUEST_CODE_ADD_REVIEW = 102
 
 class BookReviewsFragment : Fragment() {
 
-  private val adapter by lazy { BookReviewAdapter(::onItemSelected, ::onItemLongTapped) }
-  private val repository by lazy { App.repository }
+    private val adapter by lazy { BookReviewAdapter(::onItemSelected, ::onItemLongTapped) }
+    private val repository by lazy { App.repository }
+    private val bookReviewFlow by lazy { repository.getReviewsFlow() }
 
-  override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-      savedInstanceState: Bundle?): View? {
-    return inflater.inflate(R.layout.fragment_reviews, container, false)
-  }
-
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-    initListeners()
-    initUi()
-    loadBookReviews()
-  }
-
-  private fun initUi() {
-    reviewsRecyclerView.layoutManager = LinearLayoutManager(context)
-    reviewsRecyclerView.adapter = adapter
-  }
-
-  private fun initListeners() {
-    pullToRefresh.isEnabled = false
-
-    addBookReview.setOnClickListener {
-      startActivityForResult(
-          AddBookReviewActivity.getIntent(requireContext()), REQUEST_CODE_ADD_REVIEW
-      )
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_reviews, container, false)
     }
 
-    pullToRefresh.setOnRefreshListener {
-      loadBookReviews()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initListeners()
+        initUi()
+        loadBookReviews()
     }
-  }
 
-  private fun onItemSelected(item: BookReview) {
-    startActivity(BookReviewDetailsActivity.getIntent(requireContext(), item))
-  }
+    private fun initUi() {
+        reviewsRecyclerView.layoutManager = LinearLayoutManager(context)
+        reviewsRecyclerView.adapter = adapter
+        pullToRefresh.isEnabled = false
+    }
 
-  private fun onItemLongTapped(item: BookReview) {
-    createAndShowDialog(requireContext(),
-        getString(R.string.delete_title),
-        getString(R.string.delete_review_message, item.book.name),
-        onPositiveAction = { removeReviewFromRepo(item) })
-  }
+    private fun initListeners() {
+        addBookReview.setOnClickListener {
+            startActivityForResult(
+                    AddBookReviewActivity.getIntent(requireContext()), REQUEST_CODE_ADD_REVIEW
+            )
+        }
+    }
 
-  private fun removeReviewFromRepo(item: BookReview) {
-    repository.deleteReview(item.review)
-    loadBookReviews()
-  }
+    private fun onItemSelected(item: BookReview) {
+        startActivity(BookReviewDetailsActivity.getIntent(requireContext(), item))
+    }
 
-  private fun loadBookReviews() {
-    adapter.setData(repository.getReviews())
-    pullToRefresh.isRefreshing = false
-  }
+    private fun onItemLongTapped(item: BookReview) {
+        createAndShowDialog(requireContext(),
+                getString(R.string.delete_title),
+                getString(R.string.delete_review_message, item.book.name),
+                onPositiveAction = { removeReviewFromRepo(item) })
+    }
+
+    private fun removeReviewFromRepo(item: BookReview) {
+        repository.deleteReview(item.review)
+        loadBookReviews()
+    }
+
+    private fun loadBookReviews() = lifecycleScope.launch {
+        bookReviewFlow.catch { error ->
+            error.printStackTrace()
+        }.collect {
+            adapter.setData(it)
+        }
+    }
+
 }

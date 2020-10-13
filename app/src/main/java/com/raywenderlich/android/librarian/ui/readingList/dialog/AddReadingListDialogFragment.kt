@@ -84,7 +84,6 @@ class AddReadingListDialogFragment(private val onListAdded: () -> Unit) : Dialog
 
             lifecycleScope.launch { repository.addReadingList(readingList) }
 
-
             onListAdded()
             dismissAllowingStateLoss()
         }

@@ -50,6 +50,8 @@ import com.raywenderlich.android.librarian.ui.readingListDetails.ReadingListDeta
 import com.raywenderlich.android.librarian.utils.createAndShowDialog
 import com.raywenderlich.android.librarian.utils.toast
 import kotlinx.android.synthetic.main.fragment_reading_list.*
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class ReadingListFragment : Fragment() {
@@ -58,6 +60,7 @@ class ReadingListFragment : Fragment() {
     private val readingLists = listOf<ReadingListsWithBooks>()
 
     private val repository by lazy { App.repository }
+    private val getReadingListFlow by lazy { repository.getReadingListFlow() }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -74,13 +77,17 @@ class ReadingListFragment : Fragment() {
     private fun initUi() {
         readingListRecyclerView.layoutManager = LinearLayoutManager(context)
         readingListRecyclerView.adapter = adapter
+        pullToRefresh.isEnabled = false
     }
 
 
     private fun loadReadingLists() {
         lifecycleScope.launch {
-            adapter.setData(repository.getReadingList())
-            pullToRefresh.isRefreshing = false
+            getReadingListFlow.catch { it.printStackTrace() }
+                    .collect { readingLists ->
+                        adapter.setData(readingLists)
+                    }
+
         }
     }
 
@@ -89,10 +96,6 @@ class ReadingListFragment : Fragment() {
 
         addReadingList.setOnClickListener {
             showAddReadingListDialog()
-        }
-
-        pullToRefresh.setOnRefreshListener {
-            loadReadingLists()
         }
     }
 
@@ -117,7 +120,6 @@ class ReadingListFragment : Fragment() {
     private fun removeReadingList(readingList: ReadingListsWithBooks) {
         lifecycleScope.launch {
             repository.removeReadingList(ReadingList(readingList.id, readingList.name))
-            loadReadingLists()
         }
     }
 

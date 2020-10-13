@@ -11,6 +11,8 @@ import com.raywenderlich.android.librarian.model.Review
 import com.raywenderlich.android.librarian.model.relations.BookAndGenre
 import com.raywenderlich.android.librarian.model.relations.BookReview
 import com.raywenderlich.android.librarian.model.relations.ReadingListsWithBooks
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * Created By Taufiq on 10/8/2020.
@@ -67,6 +69,9 @@ class LibrarianRepositoryImpl(
         return reviewDao.getReview()
     }
 
+
+    override fun getReviewsFlow(): Flow<List<BookReview>>  = reviewDao.getReviewFlow()
+
 //    override fun deleteReview(review: BookReview) {
 //
 //    }
@@ -77,6 +82,11 @@ class LibrarianRepositoryImpl(
             readingListDao.getReadingList().map {
                 ReadingListsWithBooks(it.id, it.name, emptyList())
             }
+
+
+    override fun getReadingListFlow(): Flow<List<ReadingListsWithBooks>> = readingListDao.getReadingListFlow().map { item->
+        item.map { ReadingListsWithBooks(it.id, it.name, emptyList()) }
+    }
 
     override suspend fun removeReadingList(readingList: ReadingList) {
         readingListDao.deleteReadingList(readingList)
@@ -93,7 +103,7 @@ class LibrarianRepositoryImpl(
     override fun getBooksByRating(rating: Int): List<BookAndGenre> {
         val reviewByRating = reviewDao.getReviewByRating(rating)
 
-          return reviewByRating.map {
+        return reviewByRating.map {
             BookAndGenre(it.book, genreDao.getGenreById(it.book.genreId))
         }
     }

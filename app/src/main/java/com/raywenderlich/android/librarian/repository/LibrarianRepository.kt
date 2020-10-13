@@ -8,6 +8,7 @@ import com.raywenderlich.android.librarian.model.relations.BookAndGenre
 import com.raywenderlich.android.librarian.model.relations.BookReview
 import com.raywenderlich.android.librarian.model.relations.BooksByGenre
 import com.raywenderlich.android.librarian.model.relations.ReadingListsWithBooks
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Created By Taufiq on 10/8/2020.
@@ -34,6 +35,8 @@ interface LibrarianRepository {
 
     fun getReviews(): List<BookReview>
 
+    fun getReviewsFlow(): Flow<List<BookReview>>
+
     fun getReviewById(reviewId: String): BookReview
 
     fun deleteReview(review: Review)
@@ -43,6 +46,8 @@ interface LibrarianRepository {
     suspend fun addReadingList(readingList: ReadingList)
 
     suspend fun getReadingList(): List<ReadingListsWithBooks>
+
+    fun getReadingListFlow(): Flow<List<ReadingListsWithBooks>>
 
     suspend fun removeReadingList(readingList: ReadingList)
 

@@ -3,6 +3,7 @@ package com.raywenderlich.android.librarian.database.dao
 import androidx.room.*
 import com.raywenderlich.android.librarian.model.Review
 import com.raywenderlich.android.librarian.model.relations.BookReview
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Created By Taufiq on 10/8/2020.
@@ -23,6 +24,10 @@ interface ReviewDao {
 
     @Query("SELECT * FROM review WHERE id = :reviewId")
     fun getReviewById(reviewId: String): BookReview
+
+    @Transaction
+    @Query("SELECT * FROM review")
+    fun getReviewFlow(): Flow<List<BookReview>>
 
     @Delete
     fun deleteReview(review: Review)
