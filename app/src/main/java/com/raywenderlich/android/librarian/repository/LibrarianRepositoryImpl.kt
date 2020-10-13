@@ -54,8 +54,8 @@ class LibrarianRepositoryImpl(
     override fun updateReview(review: Review) = reviewDao.updateReview(review)
 
     override fun getReviewById(reviewId: String): BookReview {
-        val review = reviewDao.getReviewById(reviewId)
-        return BookReview(review, bookDao.getBookById(review.bookId))
+        return reviewDao.getReviewById(reviewId)
+
 
     }
 
@@ -64,9 +64,7 @@ class LibrarianRepositoryImpl(
     }
 
     override fun getReviews(): List<BookReview> {
-        return reviewDao.getReview().map {
-            BookReview(it, bookDao.getBookById(it.bookId))
-        }
+        return reviewDao.getReview()
     }
 
 //    override fun deleteReview(review: BookReview) {
@@ -91,5 +89,13 @@ class LibrarianRepositoryImpl(
                 return books.map { BookAndGenre(it, booksByGenre.genre) }
 
             }
+
+    override fun getBooksByRating(rating: Int): List<BookAndGenre> {
+        val reviewByRating = reviewDao.getReviewByRating(rating)
+
+          return reviewByRating.map {
+            BookAndGenre(it.book, genreDao.getGenreById(it.book.genreId))
+        }
+    }
 
 }
